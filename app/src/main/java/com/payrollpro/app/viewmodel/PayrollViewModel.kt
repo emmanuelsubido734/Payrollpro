@@ -24,6 +24,20 @@ class PayrollViewModel : ViewModel() {
     // TODO: once the backend exists, load this from the Payroll table instead of memory.
     val payrollHistory: SnapshotStateList<PayrollResult> = mutableStateListOf()
 
+    var isDarkTheme = mutableStateOf(false)
+        private set
+
+    fun setDarkTheme(enabled: Boolean) {
+        isDarkTheme.value = enabled
+    }
+
+    var soapEndpoint = mutableStateOf("http://10.0.2.2/payroll/soap_server.php")
+        private set
+
+    fun setSoapEndpoint(url: String) {
+        soapEndpoint.value = url
+    }
+
     fun findEmployee(employeeId: String): Employee? =
         employees.find { it.employeeId == employeeId }
 

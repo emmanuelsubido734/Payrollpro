@@ -11,8 +11,7 @@ import com.payrollpro.app.ui.screens.*
 import com.payrollpro.app.viewmodel.PayrollViewModel
 
 @Composable
-fun PayrollNavGraph(navController: NavHostController) {
-    val viewModel: PayrollViewModel = viewModel()
+fun PayrollNavGraph(navController: NavHostController, viewModel: PayrollViewModel) {
 
     NavHost(navController = navController, startDestination = Screen.Login.route) {
 
@@ -92,7 +91,18 @@ fun PayrollNavGraph(navController: NavHostController) {
         }
 
         composable(Screen.Settings.route) {
-            SettingsScreen(onBack = { navController.popBackStack() })
+            SettingsScreen(
+                isDarkTheme = viewModel.isDarkTheme.value,
+                onDarkThemeChange = { viewModel.setDarkTheme(it) },
+                soapEndpoint = viewModel.soapEndpoint.value,
+                onSoapEndpointChange = { viewModel.setSoapEndpoint(it) },
+                onLogout = {
+                    navController.navigate(Screen.Login.route) {
+                        popUpTo(0) { inclusive = true }
+                    }
+                },
+                onBack = { navController.popBackStack() }
+            )
         }
     }
 }
