@@ -84,7 +84,11 @@ fun PayrollNavGraph(navController: NavHostController) {
         }
 
         composable(Screen.PayrollHistory.route) {
-            PayrollHistoryScreen(onBack = { navController.popBackStack() })
+            PayrollHistoryScreen(
+                history = viewModel.payrollHistory,
+                findEmployee = { id -> viewModel.findEmployee(id) },
+                onBack = { navController.popBackStack() }
+            )
         }
 
         composable(Screen.Settings.route) {

@@ -20,6 +20,10 @@ class PayrollViewModel : ViewModel() {
     var lastResult = mutableStateOf<PayrollResult?>(null)
         private set
 
+    // Every computed payroll gets appended here — this is what the History screen reads.
+    // TODO: once the backend exists, load this from the Payroll table instead of memory.
+    val payrollHistory: SnapshotStateList<PayrollResult> = mutableStateListOf()
+
     fun findEmployee(employeeId: String): Employee? =
         employees.find { it.employeeId == employeeId }
 
@@ -64,6 +68,7 @@ class PayrollViewModel : ViewModel() {
             date = java.text.SimpleDateFormat("yyyy-MM-dd").format(java.util.Date())
         )
         lastResult.value = result
+        payrollHistory.add(0, result) // newest first
         return result
     }
 }
