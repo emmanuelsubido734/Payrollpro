@@ -5,7 +5,8 @@ data class Employee(
     val firstName: String,
     val lastName: String,
     val position: String,
-    val hourlyRate: Double
+    val hourlyRate: Double,
+    val civilStatus: String = "single"
 ) {
     val fullName: String get() = "$firstName $lastName"
 }

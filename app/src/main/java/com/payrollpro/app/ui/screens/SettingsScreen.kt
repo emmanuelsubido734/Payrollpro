@@ -21,6 +21,7 @@ fun SettingsScreen(
     onBack: () -> Unit
 ) {
     var showAboutDialog by remember { mutableStateOf(false) }
+    var showEndpointSavedDialog by remember { mutableStateOf(false) }
     var endpointText by remember(soapEndpoint) { mutableStateOf(soapEndpoint) }
 
     Scaffold(
@@ -63,7 +64,10 @@ fun SettingsScreen(
                 )
                 Spacer(Modifier.height(8.dp))
                 Button(
-                    onClick = { onSoapEndpointChange(endpointText) },
+                    onClick = {
+                        onSoapEndpointChange(endpointText)
+                        showEndpointSavedDialog = true
+                    },
                     modifier = Modifier.align(Alignment.End)
                 ) {
                     Text("Save")
@@ -85,7 +89,18 @@ fun SettingsScreen(
                 TextButton(onClick = { showAboutDialog = false }) { Text("OK") }
             },
             title = { Text("About PayrollPro") },
-            text = { Text("PayrollPro — Android Payroll Management System\nIT130 Machine Problem") }
+            text = { Text("PayrollPro \u2014 Android Payroll Management System\nIT130 Machine Problem") }
+        )
+    }
+
+    if (showEndpointSavedDialog) {
+        AlertDialog(
+            onDismissRequest = { showEndpointSavedDialog = false },
+            confirmButton = {
+                TextButton(onClick = { showEndpointSavedDialog = false }) { Text("OK") }
+            },
+            title = { Text("Endpoint Updated") },
+            text = { Text("SOAP endpoint has been changed to:\n$endpointText") }
         )
     }
 }

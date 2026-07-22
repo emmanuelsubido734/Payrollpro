@@ -17,9 +17,9 @@ class PayrollViewModel : ViewModel() {
     // Mock employee data — replace with records pulled from the database once the
     // REST/SOAP layer is wired in.
     val employees: SnapshotStateList<Employee> = mutableStateListOf(
-        Employee("E001", "Juan", "Dela Cruz", "Machine Operator", 85.0),
-        Employee("E002", "Maria", "Santos", "Line Supervisor", 120.0),
-        Employee("E003", "Pedro", "Reyes", "Warehouse Staff", 75.0)
+        Employee("E001", "Juan", "Dela Cruz", "Machine Operator", 85.0, "single"),
+        Employee("E002", "Maria", "Santos", "Line Supervisor", 120.0, "married"),
+        Employee("E003", "Pedro", "Reyes", "Warehouse Staff", 75.0, "single")
     )
 
     var lastResult = mutableStateOf<PayrollResult?>(null)
@@ -59,7 +59,6 @@ class PayrollViewModel : ViewModel() {
         hoursWorked: Double,
         overtimeHours: Double,
         overtimeMultiplier: Double = 1.25,
-        civilStatus: String = "single",
         sss: Double = 500.0,
         philHealth: Double = 250.0,
         pagIbig: Double = 100.0,
@@ -75,7 +74,7 @@ class PayrollViewModel : ViewModel() {
                     val gross = client.computeGrossPay(
                         employee.hourlyRate, hoursWorked, overtimeHours, overtimeMultiplier
                     )
-                    val tax = client.computeTax(gross.grossPay, civilStatus)
+                    val tax = client.computeTax(gross.grossPay, employee.civilStatus)
                     val deductions = client.computeDeductions(sss, philHealth, pagIbig, otherDeductions)
                     val netPay = client.computeNetSalary(gross.grossPay, tax, deductions)
 
