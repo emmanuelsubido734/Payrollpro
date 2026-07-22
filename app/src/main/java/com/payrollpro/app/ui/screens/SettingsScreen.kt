@@ -206,7 +206,7 @@ fun SettingsScreen(
                 TextButton(onClick = { showAboutDialog = false }) { Text("OK") }
             },
             title = { Text("About PayrollPro") },
-            text = { Text("PayrollPro \u2014 Android Payroll Management System\nIT130 Machine Problem") }
+            text = { Text("PayrollPro \u2014 Android Payroll Management System\nIT140 Machine Problem") }
         )
     }
 

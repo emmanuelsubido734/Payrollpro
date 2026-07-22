@@ -1,5 +1,6 @@
 package com.payrollpro.app.ui.screens
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -7,7 +8,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -26,6 +27,8 @@ fun PayrollHistoryScreen(
     onBack: () -> Unit,
     onRefresh: () -> Unit
 ) {
+    var selectedRecord by remember { mutableStateOf<PayrollResult?>(null) }
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -68,15 +71,46 @@ fun PayrollHistoryScreen(
                         val employeeName = findEmployee(record.employeeId)?.fullName ?: record.employeeId
                         ListItem(
                             headlineContent = { Text(employeeName) },
-                            supportingContent = { Text(record.date) },
+                            supportingContent = { Text("ID: ${record.employeeId} \u00b7 ${record.date}") },
                             trailingContent = {
                                 Text("\u20b1${String.format(Locale.US, "%.2f", record.netPay)}")
-                            }
+                            },
+                            modifier = Modifier.clickable { selectedRecord = record }
                         )
                         Divider()
                     }
                 }
             }
         }
+    }
+
+    selectedRecord?.let { record ->
+        val employeeName = findEmployee(record.employeeId)?.fullName ?: record.employeeId
+        AlertDialog(
+            onDismissRequest = { selectedRecord = null },
+            confirmButton = {
+                TextButton(onClick = { selectedRecord = null }) { Text("Close") }
+            },
+            title = { Text("Payroll Details") },
+            text = {
+                Column {
+                    Text("Employee: $employeeName")
+                    Text("Employee ID: ${record.employeeId}")
+                    Text("Date: ${record.date}")
+                    Spacer(Modifier.height(8.dp))
+                    Text("Hours Worked: ${record.hoursWorked}")
+                    Text("Overtime Hours: ${record.overtimeHours}")
+                    Spacer(Modifier.height(8.dp))
+                    Text("Gross Pay: \u20b1${String.format(Locale.US, "%.2f", record.grossPay)}")
+                    Text("Tax: \u20b1${String.format(Locale.US, "%.2f", record.tax)}")
+                    Text("Deductions: \u20b1${String.format(Locale.US, "%.2f", record.deductions)}")
+                    Divider(modifier = Modifier.padding(vertical = 4.dp))
+                    Text(
+                        "Net Pay: \u20b1${String.format(Locale.US, "%.2f", record.netPay)}",
+                        style = MaterialTheme.typography.titleMedium
+                    )
+                }
+            }
+        )
     }
 }

@@ -8,6 +8,9 @@ sealed class Screen(val route: String) {
     object PayrollCalculator : Screen("payroll_calculator/{employeeId}") {
         fun createRoute(employeeId: String) = "payroll_calculator/$employeeId"
     }
+    object EmployeeDetail : Screen("employee_detail/{employeeId}") {
+        fun createRoute(employeeId: String) = "employee_detail/$employeeId"
+    }
     object Payslip : Screen("payslip")
     object PayrollHistory : Screen("payroll_history")
     object Settings : Screen("settings")

@@ -41,13 +41,30 @@ fun PayrollNavGraph(navController: NavHostController, viewModel: PayrollViewMode
                 onBack = { navController.popBackStack() },
                 onAddEmployee = { navController.navigate(Screen.AddEmployee.route) },
                 onSelectEmployee = { employee ->
-                    navController.navigate(Screen.PayrollCalculator.createRoute(employee.employeeId))
+                    navController.navigate(Screen.EmployeeDetail.createRoute(employee.employeeId))
                 },
                 onRefresh = { viewModel.loadEmployeesFromServer() },
                 onDeleteEmployee = { employee, onSuccess, onError ->
                     viewModel.deleteEmployee(employee.employeeId, onSuccess, onError)
                 }
             )
+        }
+
+        composable(
+            route = Screen.EmployeeDetail.route,
+            arguments = listOf(navArgument("employeeId") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val employeeId = backStackEntry.arguments?.getString("employeeId") ?: ""
+            val employee = viewModel.findEmployee(employeeId)
+            if (employee != null) {
+                EmployeeDetailScreen(
+                    employee = employee,
+                    onBack = { navController.popBackStack() },
+                    onComputePayroll = {
+                        navController.navigate(Screen.PayrollCalculator.createRoute(employee.employeeId))
+                    }
+                )
+            }
         }
 
         composable(Screen.AddEmployee.route) {

@@ -86,7 +86,7 @@ fun EmployeeListScreen(
                     items(employees, key = { it.employeeId }) { employee ->
                         ListItem(
                             headlineContent = { Text(employee.fullName) },
-                            supportingContent = { Text("${employee.position} \u00b7 \u20b1${employee.hourlyRate}/hr") },
+                            supportingContent = { Text("ID: ${employee.employeeId} \u00b7 ${employee.position} \u00b7 \u20b1${employee.hourlyRate}/hr") },
                             trailingContent = {
                                 IconButton(onClick = {
                                     deleteError = null
