@@ -32,13 +32,16 @@ fun SettingsScreen(
     otherDeductions: Double,
     onOtherDeductionsChange: (Double) -> Unit,
     onLogout: () -> Unit,
-    onBack: () -> Unit
+    onBack: () -> Unit,
+    restBaseUrl: String,
+    onRestBaseUrlChange: (String) -> Unit
 ) {
     var showAboutDialog by remember { mutableStateOf(false) }
     var showEndpointSavedDialog by remember { mutableStateOf(false) }
     var showDefaultsSavedDialog by remember { mutableStateOf(false) }
     var endpointText by remember(soapEndpoint) { mutableStateOf(soapEndpoint) }
-
+    var restUrlText by remember(restBaseUrl) { mutableStateOf(restBaseUrl) }
+    var showRestUrlSavedDialog by remember { mutableStateOf(false) }
     var overtimeText by remember(overtimeMultiplier) { mutableStateOf(overtimeMultiplier.toString()) }
     var sssText by remember(sss) { mutableStateOf(sss.toString()) }
     var philHealthText by remember(philHealth) { mutableStateOf(philHealth.toString()) }
@@ -93,6 +96,29 @@ fun SettingsScreen(
                     onClick = {
                         onSoapEndpointChange(endpointText)
                         showEndpointSavedDialog = true
+                    },
+                    modifier = Modifier.align(Alignment.End)
+                ) {
+                    Text("Save")
+                }
+            }
+            Divider()
+
+            Column(modifier = Modifier.padding(16.dp)) {
+                Text("REST API Base URL", style = MaterialTheme.typography.titleMedium)
+                Spacer(Modifier.height(8.dp))
+                OutlinedTextField(
+                    value = restUrlText,
+                    onValueChange = { restUrlText = it },
+                    label = { Text("e.g. http://10.0.2.2/payroll/") },
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth()
+                )
+                Spacer(Modifier.height(8.dp))
+                Button(
+                    onClick = {
+                        onRestBaseUrlChange(restUrlText)
+                        showRestUrlSavedDialog = true
                     },
                     modifier = Modifier.align(Alignment.End)
                 ) {
@@ -192,6 +218,17 @@ fun SettingsScreen(
             },
             title = { Text("Endpoint Updated") },
             text = { Text("SOAP endpoint has been changed to:\n$endpointText") }
+        )
+    }
+
+    if (showRestUrlSavedDialog) {
+        AlertDialog(
+            onDismissRequest = { showRestUrlSavedDialog = false },
+            confirmButton = {
+                TextButton(onClick = { showRestUrlSavedDialog = false }) { Text("OK") }
+            },
+            title = { Text("REST URL Updated") },
+            text = { Text("REST API base URL has been changed to:\n$restUrlText") }
         )
     }
 

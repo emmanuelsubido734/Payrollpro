@@ -9,6 +9,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.payrollpro.app.model.Employee
@@ -16,8 +17,9 @@ import com.payrollpro.app.model.Employee
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddEmployeeScreen(
+    isSaving: Boolean,
     onBack: () -> Unit,
-    onSave: (Employee) -> Unit
+    onSave: (Employee, onSuccess: () -> Unit, onError: (String) -> Unit) -> Unit
 ) {
     var employeeId by remember { mutableStateOf("") }
     var firstName by remember { mutableStateOf("") }
@@ -25,6 +27,7 @@ fun AddEmployeeScreen(
     var position by remember { mutableStateOf("") }
     var hourlyRate by remember { mutableStateOf("") }
     var civilStatus by remember { mutableStateOf("single") }
+    var errorMessage by remember { mutableStateOf<String?>(null) }
 
     Scaffold(
         topBar = {
@@ -94,18 +97,34 @@ fun AddEmployeeScreen(
                 }
             }
 
+            errorMessage?.let {
+                Spacer(Modifier.height(12.dp))
+                Text(it, color = Color.Red, style = MaterialTheme.typography.bodySmall)
+            }
+
             Spacer(Modifier.height(24.dp))
             Button(
+                enabled = !isSaving,
                 onClick = {
                     val rate = hourlyRate.toDoubleOrNull() ?: 0.0
                     if (employeeId.isNotBlank() && firstName.isNotBlank() && lastName.isNotBlank()) {
-                        onSave(Employee(employeeId, firstName, lastName, position, rate, civilStatus))
-                        onBack()
+                        errorMessage = null
+                        onSave(
+                            Employee(employeeId, firstName, lastName, position, rate, civilStatus),
+                            { onBack() },
+                            { message -> errorMessage = message }
+                        )
+                    } else {
+                        errorMessage = "Employee ID, first name, and last name are required."
                     }
                 },
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Text("Save Employee")
+                if (isSaving) {
+                    CircularProgressIndicator(modifier = Modifier.size(20.dp), color = Color.White)
+                } else {
+                    Text("Save Employee")
+                }
             }
         }
     }

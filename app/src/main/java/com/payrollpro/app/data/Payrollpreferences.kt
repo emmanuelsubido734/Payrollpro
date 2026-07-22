@@ -18,6 +18,7 @@ class PayrollPreferences(private val context: Context) {
 
     private object Keys {
         val SOAP_ENDPOINT = stringPreferencesKey("soap_endpoint")
+        val REST_BASE_URL = stringPreferencesKey("rest_base_url")
         val OVERTIME_MULTIPLIER = doublePreferencesKey("overtime_multiplier")
         val SSS = doublePreferencesKey("sss")
         val PHILHEALTH = doublePreferencesKey("philhealth")
@@ -27,6 +28,7 @@ class PayrollPreferences(private val context: Context) {
 
     companion object {
         const val DEFAULT_SOAP_ENDPOINT = "http://10.0.2.2/payroll/soap_server.php"
+        const val DEFAULT_REST_BASE_URL = "http://10.0.2.2/payroll/"
         const val DEFAULT_OVERTIME_MULTIPLIER = 1.25
         const val DEFAULT_SSS = 500.0
         const val DEFAULT_PHILHEALTH = 250.0
@@ -39,6 +41,13 @@ class PayrollPreferences(private val context: Context) {
 
     suspend fun saveSoapEndpoint(value: String) {
         context.payrollDataStore.edit { it[Keys.SOAP_ENDPOINT] = value }
+    }
+
+    suspend fun loadRestBaseUrl(): String =
+        context.payrollDataStore.data.first()[Keys.REST_BASE_URL] ?: DEFAULT_REST_BASE_URL
+
+    suspend fun saveRestBaseUrl(value: String) {
+        context.payrollDataStore.edit { it[Keys.REST_BASE_URL] = value }
     }
 
     suspend fun loadOvertimeMultiplier(): Double =

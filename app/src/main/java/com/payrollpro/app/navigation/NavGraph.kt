@@ -36,18 +36,27 @@ fun PayrollNavGraph(navController: NavHostController, viewModel: PayrollViewMode
         composable(Screen.EmployeeList.route) {
             EmployeeListScreen(
                 employees = viewModel.employees,
+                isLoading = viewModel.isLoadingEmployees.value,
+                errorMessage = viewModel.employeesError.value,
                 onBack = { navController.popBackStack() },
                 onAddEmployee = { navController.navigate(Screen.AddEmployee.route) },
                 onSelectEmployee = { employee ->
                     navController.navigate(Screen.PayrollCalculator.createRoute(employee.employeeId))
+                },
+                onRefresh = { viewModel.loadEmployeesFromServer() },
+                onDeleteEmployee = { employee, onSuccess, onError ->
+                    viewModel.deleteEmployee(employee.employeeId, onSuccess, onError)
                 }
             )
         }
 
         composable(Screen.AddEmployee.route) {
             AddEmployeeScreen(
+                isSaving = viewModel.isSavingEmployee.value,
                 onBack = { navController.popBackStack() },
-                onSave = { employee -> viewModel.addEmployee(employee) }
+                onSave = { employee, onSuccess, onError ->
+                    viewModel.addEmployeeRemote(employee, onSuccess, onError)
+                }
             )
         }
 
@@ -91,8 +100,11 @@ fun PayrollNavGraph(navController: NavHostController, viewModel: PayrollViewMode
         composable(Screen.PayrollHistory.route) {
             PayrollHistoryScreen(
                 history = viewModel.payrollHistory,
+                isLoading = viewModel.isLoadingHistory.value,
+                errorMessage = viewModel.historyError.value,
                 findEmployee = { id -> viewModel.findEmployee(id) },
-                onBack = { navController.popBackStack() }
+                onBack = { navController.popBackStack() },
+                onRefresh = { viewModel.loadPayrollHistory() }
             )
         }
 
@@ -102,6 +114,8 @@ fun PayrollNavGraph(navController: NavHostController, viewModel: PayrollViewMode
                 onDarkThemeChange = { viewModel.setDarkTheme(it) },
                 soapEndpoint = viewModel.soapEndpoint.value,
                 onSoapEndpointChange = { viewModel.setSoapEndpoint(it) },
+                restBaseUrl = viewModel.restBaseUrl.value,
+                onRestBaseUrlChange = { viewModel.setRestBaseUrl(it) },
                 overtimeMultiplier = viewModel.overtimeMultiplier.value,
                 onOvertimeMultiplierChange = { viewModel.setOvertimeMultiplier(it) },
                 sss = viewModel.sss.value,
