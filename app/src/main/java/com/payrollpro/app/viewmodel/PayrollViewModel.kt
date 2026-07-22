@@ -1,10 +1,12 @@
 package com.payrollpro.app.viewmodel
 
+import android.app.Application
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.snapshots.SnapshotStateList
-import androidx.lifecycle.ViewModel
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import com.payrollpro.app.data.PayrollPreferences
 import com.payrollpro.app.model.Employee
 import com.payrollpro.app.model.PayrollResult
 import com.payrollpro.app.network.PayrollSoapClient
@@ -12,7 +14,9 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-class PayrollViewModel : ViewModel() {
+class PayrollViewModel(application: Application) : AndroidViewModel(application) {
+
+    private val preferences = PayrollPreferences(application)
 
     // Mock employee data — replace with records pulled from the database once the
     // REST/SOAP layer is wired in.
@@ -36,11 +40,62 @@ class PayrollViewModel : ViewModel() {
         isDarkTheme.value = enabled
     }
 
-    var soapEndpoint = mutableStateOf("http://10.0.2.2/payroll/soap_server.php")
+    // Loaded from DataStore in init{} below; this is just the value shown before that load completes.
+    var soapEndpoint = mutableStateOf(PayrollPreferences.DEFAULT_SOAP_ENDPOINT)
         private set
 
     fun setSoapEndpoint(url: String) {
         soapEndpoint.value = url
+        viewModelScope.launch { preferences.saveSoapEndpoint(url) }
+    }
+
+    // Payroll defaults — editable from Settings, persisted via DataStore so they
+    // survive app restarts, not just configuration changes.
+    var overtimeMultiplier = mutableStateOf(PayrollPreferences.DEFAULT_OVERTIME_MULTIPLIER)
+        private set
+    var sss = mutableStateOf(PayrollPreferences.DEFAULT_SSS)
+        private set
+    var philHealth = mutableStateOf(PayrollPreferences.DEFAULT_PHILHEALTH)
+        private set
+    var pagIbig = mutableStateOf(PayrollPreferences.DEFAULT_PAGIBIG)
+        private set
+    var otherDeductions = mutableStateOf(PayrollPreferences.DEFAULT_OTHER_DEDUCTIONS)
+        private set
+
+    fun setOvertimeMultiplier(value: Double) {
+        overtimeMultiplier.value = value
+        viewModelScope.launch { preferences.saveOvertimeMultiplier(value) }
+    }
+
+    fun setSss(value: Double) {
+        sss.value = value
+        viewModelScope.launch { preferences.saveSss(value) }
+    }
+
+    fun setPhilHealth(value: Double) {
+        philHealth.value = value
+        viewModelScope.launch { preferences.savePhilHealth(value) }
+    }
+
+    fun setPagIbig(value: Double) {
+        pagIbig.value = value
+        viewModelScope.launch { preferences.savePagIbig(value) }
+    }
+
+    fun setOtherDeductions(value: Double) {
+        otherDeductions.value = value
+        viewModelScope.launch { preferences.saveOtherDeductions(value) }
+    }
+
+    init {
+        viewModelScope.launch {
+            soapEndpoint.value = preferences.loadSoapEndpoint()
+            overtimeMultiplier.value = preferences.loadOvertimeMultiplier()
+            sss.value = preferences.loadSss()
+            philHealth.value = preferences.loadPhilHealth()
+            pagIbig.value = preferences.loadPagIbig()
+            otherDeductions.value = preferences.loadOtherDeductions()
+        }
     }
 
     fun findEmployee(employeeId: String): Employee? =
@@ -53,16 +108,14 @@ class PayrollViewModel : ViewModel() {
     /**
      * Calls the four PHP SOAP transactions in sequence via PayrollSoapClient,
      * off the main thread, then delivers the result (or an error) back to the caller.
+     * Overtime multiplier and deduction amounts come from the persisted Settings
+     * defaults (overtimeMultiplier/sss/philHealth/pagIbig/otherDeductions above)
+     * instead of being hardcoded here.
      */
     fun computePayroll(
         employee: Employee,
         hoursWorked: Double,
         overtimeHours: Double,
-        overtimeMultiplier: Double = 1.25,
-        sss: Double = 500.0,
-        philHealth: Double = 250.0,
-        pagIbig: Double = 100.0,
-        otherDeductions: Double = 0.0,
         onSuccess: (PayrollResult) -> Unit,
         onError: (String) -> Unit
     ) {
@@ -72,10 +125,12 @@ class PayrollViewModel : ViewModel() {
                     val client = PayrollSoapClient(soapEndpoint.value)
 
                     val gross = client.computeGrossPay(
-                        employee.hourlyRate, hoursWorked, overtimeHours, overtimeMultiplier
+                        employee.hourlyRate, hoursWorked, overtimeHours, overtimeMultiplier.value
                     )
                     val tax = client.computeTax(gross.grossPay, employee.civilStatus)
-                    val deductions = client.computeDeductions(sss, philHealth, pagIbig, otherDeductions)
+                    val deductions = client.computeDeductions(
+                        sss.value, philHealth.value, pagIbig.value, otherDeductions.value
+                    )
                     val netPay = client.computeNetSalary(gross.grossPay, tax, deductions)
 
                     PayrollResult(

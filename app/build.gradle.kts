@@ -64,4 +64,6 @@ dependencies {
         exclude(group = "net.sourceforge.kobjects", module = "kobjects-j2me")
     }
     implementation("net.sf.kxml:kxml2:2.3.0")
+
+    implementation("androidx.datastore:datastore-preferences:1.1.1")
 }

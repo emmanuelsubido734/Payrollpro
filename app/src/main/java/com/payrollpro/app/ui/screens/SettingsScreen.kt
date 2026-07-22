@@ -2,12 +2,16 @@ package com.payrollpro.app.ui.screens
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -17,12 +21,29 @@ fun SettingsScreen(
     onDarkThemeChange: (Boolean) -> Unit,
     soapEndpoint: String,
     onSoapEndpointChange: (String) -> Unit,
+    overtimeMultiplier: Double,
+    onOvertimeMultiplierChange: (Double) -> Unit,
+    sss: Double,
+    onSssChange: (Double) -> Unit,
+    philHealth: Double,
+    onPhilHealthChange: (Double) -> Unit,
+    pagIbig: Double,
+    onPagIbigChange: (Double) -> Unit,
+    otherDeductions: Double,
+    onOtherDeductionsChange: (Double) -> Unit,
     onLogout: () -> Unit,
     onBack: () -> Unit
 ) {
     var showAboutDialog by remember { mutableStateOf(false) }
     var showEndpointSavedDialog by remember { mutableStateOf(false) }
+    var showDefaultsSavedDialog by remember { mutableStateOf(false) }
     var endpointText by remember(soapEndpoint) { mutableStateOf(soapEndpoint) }
+
+    var overtimeText by remember(overtimeMultiplier) { mutableStateOf(overtimeMultiplier.toString()) }
+    var sssText by remember(sss) { mutableStateOf(sss.toString()) }
+    var philHealthText by remember(philHealth) { mutableStateOf(philHealth.toString()) }
+    var pagIbigText by remember(pagIbig) { mutableStateOf(pagIbig.toString()) }
+    var otherDeductionsText by remember(otherDeductions) { mutableStateOf(otherDeductions.toString()) }
 
     Scaffold(
         topBar = {
@@ -36,7 +57,12 @@ fun SettingsScreen(
             )
         }
     ) { padding ->
-        Column(modifier = Modifier.fillMaxSize().padding(padding)) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(padding)
+                .verticalScroll(rememberScrollState())
+        ) {
 
             ListItem(
                 headlineContent = { Text("Dark Mode") },
@@ -75,6 +101,71 @@ fun SettingsScreen(
             }
             Divider()
 
+            Column(modifier = Modifier.padding(16.dp)) {
+                Text("Payroll Defaults", style = MaterialTheme.typography.titleMedium)
+                Spacer(Modifier.height(8.dp))
+
+                OutlinedTextField(
+                    value = overtimeText,
+                    onValueChange = { overtimeText = it },
+                    label = { Text("Overtime Multiplier") },
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth()
+                )
+                Spacer(Modifier.height(8.dp))
+                OutlinedTextField(
+                    value = sssText,
+                    onValueChange = { sssText = it },
+                    label = { Text("SSS Deduction") },
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth()
+                )
+                Spacer(Modifier.height(8.dp))
+                OutlinedTextField(
+                    value = philHealthText,
+                    onValueChange = { philHealthText = it },
+                    label = { Text("PhilHealth Deduction") },
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth()
+                )
+                Spacer(Modifier.height(8.dp))
+                OutlinedTextField(
+                    value = pagIbigText,
+                    onValueChange = { pagIbigText = it },
+                    label = { Text("Pag-IBIG Deduction") },
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth()
+                )
+                Spacer(Modifier.height(8.dp))
+                OutlinedTextField(
+                    value = otherDeductionsText,
+                    onValueChange = { otherDeductionsText = it },
+                    label = { Text("Other Deductions") },
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth()
+                )
+                Spacer(Modifier.height(8.dp))
+                Button(
+                    onClick = {
+                        onOvertimeMultiplierChange(overtimeText.toDoubleOrNull() ?: overtimeMultiplier)
+                        onSssChange(sssText.toDoubleOrNull() ?: sss)
+                        onPhilHealthChange(philHealthText.toDoubleOrNull() ?: philHealth)
+                        onPagIbigChange(pagIbigText.toDoubleOrNull() ?: pagIbig)
+                        onOtherDeductionsChange(otherDeductionsText.toDoubleOrNull() ?: otherDeductions)
+                        showDefaultsSavedDialog = true
+                    },
+                    modifier = Modifier.align(Alignment.End)
+                ) {
+                    Text("Save")
+                }
+            }
+            Divider()
+
             ListItem(
                 headlineContent = { Text("Logout", color = MaterialTheme.colorScheme.error) },
                 modifier = Modifier.clickable { onLogout() }
@@ -101,6 +192,17 @@ fun SettingsScreen(
             },
             title = { Text("Endpoint Updated") },
             text = { Text("SOAP endpoint has been changed to:\n$endpointText") }
+        )
+    }
+
+    if (showDefaultsSavedDialog) {
+        AlertDialog(
+            onDismissRequest = { showDefaultsSavedDialog = false },
+            confirmButton = {
+                TextButton(onClick = { showDefaultsSavedDialog = false }) { Text("OK") }
+            },
+            title = { Text("Payroll Defaults Updated") },
+            text = { Text("Your changes will be used the next time payroll is computed.") }
         )
     }
 }
