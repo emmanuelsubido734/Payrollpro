@@ -62,8 +62,14 @@ fun PayrollNavGraph(navController: NavHostController, viewModel: PayrollViewMode
                 PayrollCalculatorScreen(
                     employee = employee,
                     onBack = { navController.popBackStack() },
-                    onCompute = { hoursWorked, overtimeHours ->
-                        viewModel.computePayroll(employee, hoursWorked, overtimeHours)
+                    onCompute = { hoursWorked, overtimeHours, onResult, onError ->
+                        viewModel.computePayroll(
+                            employee = employee,
+                            hoursWorked = hoursWorked,
+                            overtimeHours = overtimeHours,
+                            onSuccess = onResult,
+                            onError = onError
+                        )
                     },
                     onComputed = { navController.navigate(Screen.Payslip.route) }
                 )

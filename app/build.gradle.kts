@@ -57,4 +57,11 @@ dependencies {
     implementation("androidx.navigation:navigation-compose:2.8.0")
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.4")
     implementation("androidx.compose.material:material-icons-extended:1.6.8")
+
+    implementation("com.google.code.gson:gson:2.11.0") // not required, safe to skip if unused elsewhere
+    implementation("com.github.simpligility.ksoap2-android:ksoap2-android:3.6.4") {
+        exclude(group = "net.sourceforge.kxml", module = "kxml")
+        exclude(group = "net.sourceforge.kobjects", module = "kobjects-j2me")
+    }
+    implementation("net.sf.kxml:kxml2:2.3.0")
 }

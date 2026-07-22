@@ -4,8 +4,13 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.payrollpro.app.model.Employee
 import com.payrollpro.app.model.PayrollResult
+import com.payrollpro.app.network.PayrollSoapClient
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class PayrollViewModel : ViewModel() {
 
@@ -46,43 +51,51 @@ class PayrollViewModel : ViewModel() {
     }
 
     /**
-     * Local placeholder so the UI is testable before the SOAP service exists.
-     * TODO: replace this with sequential ksoap2-android calls to the PHP SOAP server:
-     *   1. ComputeGrossPay(hourlyRate, hoursWorked, overtimeHours, overtimeMultiplier)
-     *   2. ComputeTax(grossPay, taxRate, civilStatus)
-     *   3. ComputeDeductions(grossPay, sss, philHealth, pagIbig, otherDeductions)
-     *   4. ComputeNetSalary(grossPay, tax, deductions)
+     * Calls the four PHP SOAP transactions in sequence via PayrollSoapClient,
+     * off the main thread, then delivers the result (or an error) back to the caller.
      */
     fun computePayroll(
         employee: Employee,
         hoursWorked: Double,
         overtimeHours: Double,
         overtimeMultiplier: Double = 1.25,
-        taxRate: Double = 0.10,
+        civilStatus: String = "single",
         sss: Double = 500.0,
         philHealth: Double = 250.0,
         pagIbig: Double = 100.0,
-        otherDeductions: Double = 0.0
-    ): PayrollResult {
-        val regularPay = hoursWorked * employee.hourlyRate
-        val overtimePay = overtimeHours * employee.hourlyRate * overtimeMultiplier
-        val grossPay = regularPay + overtimePay
-        val tax = grossPay * taxRate
-        val deductions = sss + philHealth + pagIbig + otherDeductions
-        val netPay = grossPay - tax - deductions
+        otherDeductions: Double = 0.0,
+        onSuccess: (PayrollResult) -> Unit,
+        onError: (String) -> Unit
+    ) {
+        viewModelScope.launch {
+            try {
+                val result = withContext(Dispatchers.IO) {
+                    val client = PayrollSoapClient(soapEndpoint.value)
 
-        val result = PayrollResult(
-            employeeId = employee.employeeId,
-            hoursWorked = hoursWorked,
-            overtimeHours = overtimeHours,
-            grossPay = grossPay,
-            tax = tax,
-            deductions = deductions,
-            netPay = netPay,
-            date = java.text.SimpleDateFormat("yyyy-MM-dd").format(java.util.Date())
-        )
-        lastResult.value = result
-        payrollHistory.add(0, result) // newest first
-        return result
+                    val gross = client.computeGrossPay(
+                        employee.hourlyRate, hoursWorked, overtimeHours, overtimeMultiplier
+                    )
+                    val tax = client.computeTax(gross.grossPay, civilStatus)
+                    val deductions = client.computeDeductions(sss, philHealth, pagIbig, otherDeductions)
+                    val netPay = client.computeNetSalary(gross.grossPay, tax, deductions)
+
+                    PayrollResult(
+                        employeeId = employee.employeeId,
+                        hoursWorked = hoursWorked,
+                        overtimeHours = overtimeHours,
+                        grossPay = gross.grossPay,
+                        tax = tax,
+                        deductions = deductions,
+                        netPay = netPay,
+                        date = java.text.SimpleDateFormat("yyyy-MM-dd").format(java.util.Date())
+                    )
+                }
+                lastResult.value = result
+                payrollHistory.add(0, result) // newest first
+                onSuccess(result)
+            } catch (e: Exception) {
+                onError(e.message ?: "Failed to reach the payroll server.")
+            }
+        }
     }
 }
