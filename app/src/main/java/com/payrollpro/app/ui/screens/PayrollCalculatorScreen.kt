@@ -17,18 +17,12 @@ import com.payrollpro.app.model.PayrollResult
 fun PayrollCalculatorScreen(
     employee: Employee,
     onBack: () -> Unit,
-    onCompute: (
-        hoursWorked: Double,
-        overtimeHours: Double,
-        onResult: (PayrollResult) -> Unit,
-        onError: (String) -> Unit
-    ) -> Unit,
+    onCompute: (hoursWorked: Double, overtimeHours: Double) -> PayrollResult,
     onComputed: (PayrollResult) -> Unit
 ) {
     var hoursWorked by remember { mutableStateOf("") }
     var overtimeHours by remember { mutableStateOf("0") }
     var isComputing by remember { mutableStateOf(false) }
-    var errorMessage by remember { mutableStateOf<String?>(null) }
 
     Scaffold(
         topBar = {
@@ -71,28 +65,18 @@ fun PayrollCalculatorScreen(
                 modifier = Modifier.fillMaxWidth()
             )
 
-            errorMessage?.let {
-                Spacer(Modifier.height(8.dp))
-                Text(text = it, color = MaterialTheme.colorScheme.error)
-            }
-
             Spacer(Modifier.height(24.dp))
             Button(
                 onClick = {
                     isComputing = true
-                    errorMessage = null
-                    onCompute(
+                    // TODO: this will call the SOAP transactions in sequence:
+                    // ComputeGrossPay() -> ComputeTax() -> ComputeDeductions() -> ComputeNetSalary()
+                    val result = onCompute(
                         hoursWorked.toDoubleOrNull() ?: 0.0,
-                        overtimeHours.toDoubleOrNull() ?: 0.0,
-                        { result ->
-                            isComputing = false
-                            onComputed(result)
-                        },
-                        { error ->
-                            isComputing = false
-                            errorMessage = error
-                        }
+                        overtimeHours.toDoubleOrNull() ?: 0.0
                     )
+                    isComputing = false
+                    onComputed(result)
                 },
                 enabled = hoursWorked.isNotBlank() && !isComputing,
                 modifier = Modifier.fillMaxWidth()

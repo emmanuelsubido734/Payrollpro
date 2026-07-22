@@ -19,12 +19,8 @@ dependencyResolutionManagement {
     repositories {
         google()
         mavenCentral()
-        maven {
-            url = uri("https://jitpack.io")
-        }
     }
-
-    rootProject.name = "Payrollpro"
-    include(":app")
-
 }
+
+rootProject.name = "Payrollpro"
+include(":app")
