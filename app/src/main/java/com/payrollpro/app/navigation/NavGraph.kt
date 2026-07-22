@@ -102,6 +102,16 @@ fun PayrollNavGraph(navController: NavHostController, viewModel: PayrollViewMode
                 onDarkThemeChange = { viewModel.setDarkTheme(it) },
                 soapEndpoint = viewModel.soapEndpoint.value,
                 onSoapEndpointChange = { viewModel.setSoapEndpoint(it) },
+                overtimeMultiplier = viewModel.overtimeMultiplier.value,
+                onOvertimeMultiplierChange = { viewModel.setOvertimeMultiplier(it) },
+                sss = viewModel.sss.value,
+                onSssChange = { viewModel.setSss(it) },
+                philHealth = viewModel.philHealth.value,
+                onPhilHealthChange = { viewModel.setPhilHealth(it) },
+                pagIbig = viewModel.pagIbig.value,
+                onPagIbigChange = { viewModel.setPagIbig(it) },
+                otherDeductions = viewModel.otherDeductions.value,
+                onOtherDeductionsChange = { viewModel.setOtherDeductions(it) },
                 onLogout = {
                     navController.navigate(Screen.Login.route) {
                         popUpTo(0) { inclusive = true }
