@@ -110,7 +110,7 @@ fun SettingsScreen(
                 OutlinedTextField(
                     value = restUrlText,
                     onValueChange = { restUrlText = it },
-                    label = { Text("e.g. http://10.0.2.2/payroll/") },
+                    label = { Text("Base URL") },
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth()
                 )
