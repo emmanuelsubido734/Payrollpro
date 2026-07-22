@@ -1,7 +1,6 @@
 package com.payrollpro.app.navigation
 
 import androidx.compose.runtime.Composable
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -62,8 +61,14 @@ fun PayrollNavGraph(navController: NavHostController, viewModel: PayrollViewMode
                 PayrollCalculatorScreen(
                     employee = employee,
                     onBack = { navController.popBackStack() },
-                    onCompute = { hoursWorked, overtimeHours ->
-                        viewModel.computePayroll(employee, hoursWorked, overtimeHours)
+                    onCompute = { hoursWorked, overtimeHours, onResult, onError ->
+                        viewModel.computePayroll(
+                            employee = employee,
+                            hoursWorked = hoursWorked,
+                            overtimeHours = overtimeHours,
+                            onSuccess = onResult,
+                            onError = onError
+                        )
                     },
                     onComputed = { navController.navigate(Screen.Payslip.route) }
                 )
@@ -77,7 +82,8 @@ fun PayrollNavGraph(navController: NavHostController, viewModel: PayrollViewMode
                 PayslipScreen(
                     result = result,
                     employeeName = employee.fullName,
-                    onBack = { navController.popBackStack(Screen.Dashboard.route, inclusive = false) }
+                    onBack = { navController.popBackStack(Screen.Dashboard.route, inclusive = false) },
+                    onConfirm = { confirmedResult -> viewModel.confirmPayroll(confirmedResult) }
                 )
             }
         }
