@@ -6,6 +6,7 @@ import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import kotlinx.coroutines.flow.first
+import androidx.datastore.preferences.core.booleanPreferencesKey
 
 private val Context.payrollDataStore by preferencesDataStore(name = "payroll_settings")
 
@@ -19,6 +20,7 @@ class PayrollPreferences(private val context: Context) {
     private object Keys {
         val SOAP_ENDPOINT = stringPreferencesKey("soap_endpoint")
         val REST_BASE_URL = stringPreferencesKey("rest_base_url")
+        val DARK_THEME = booleanPreferencesKey("dark_theme")
         val OVERTIME_MULTIPLIER = doublePreferencesKey("overtime_multiplier")
         val SSS = doublePreferencesKey("sss")
         val PHILHEALTH = doublePreferencesKey("philhealth")
@@ -29,11 +31,19 @@ class PayrollPreferences(private val context: Context) {
     companion object {
         const val DEFAULT_SOAP_ENDPOINT = "http://10.0.2.2/payroll/soap_server.php"
         const val DEFAULT_REST_BASE_URL = "http://10.0.2.2/payroll/"
+        const val DEFAULT_DARK_THEME = false
         const val DEFAULT_OVERTIME_MULTIPLIER = 1.25
         const val DEFAULT_SSS = 500.0
         const val DEFAULT_PHILHEALTH = 250.0
         const val DEFAULT_PAGIBIG = 100.0
         const val DEFAULT_OTHER_DEDUCTIONS = 0.0
+    }
+
+    suspend fun loadDarkTheme(): Boolean =
+        context.payrollDataStore.data.first()[Keys.DARK_THEME] ?: DEFAULT_DARK_THEME
+
+    suspend fun saveDarkTheme(value: Boolean) {
+        context.payrollDataStore.edit { it[Keys.DARK_THEME] = value }
     }
 
     suspend fun loadSoapEndpoint(): String =

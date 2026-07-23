@@ -49,6 +49,7 @@ class PayrollViewModel(application: Application) : AndroidViewModel(application)
 
     fun setDarkTheme(enabled: Boolean) {
         isDarkTheme.value = enabled
+        viewModelScope.launch { preferences.saveDarkTheme(enabled) }
     }
 
     // Loaded from DataStore in init{} below; this is just the value shown before that load completes.
@@ -115,6 +116,7 @@ class PayrollViewModel(application: Application) : AndroidViewModel(application)
             soapEndpoint.value = preferences.loadSoapEndpoint()
             restBaseUrl.value = preferences.loadRestBaseUrl()
             RetrofitClient.baseUrl = restBaseUrl.value
+            isDarkTheme.value = preferences.loadDarkTheme()
             overtimeMultiplier.value = preferences.loadOvertimeMultiplier()
             sss.value = preferences.loadSss()
             philHealth.value = preferences.loadPhilHealth()
