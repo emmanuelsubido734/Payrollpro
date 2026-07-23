@@ -2,7 +2,7 @@
 
 PayrollPro is an Android payroll management system built with Kotlin and Jetpack Compose. It manages employee records and computes payroll (gross pay, tax, deductions, and net pay) against a MySQL database running on XAMPP, using a mixed REST + SOAP backend.
 
-Built as an IT130 Machine Problem.
+Built as an IT140P Machine Problem.
 
 ## Features
 
