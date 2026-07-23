@@ -1,5 +1,6 @@
 package com.payrollpro.app.ui.screens
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Lock
@@ -8,9 +9,19 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
+import com.payrollpro.app.R
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.VisibilityOff
+import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.res.painterResource
+
+// Hardcoded on-device check. Not real auth
+private const val VALID_USERNAME = "admin"
+private const val VALID_PASSWORD = "payroll123"
 
 @Composable
 fun LoginScreen(
@@ -19,6 +30,7 @@ fun LoginScreen(
     var username by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var errorMessage by remember { mutableStateOf<String?>(null) }
+    var passwordVisible by remember { mutableStateOf(false) }
 
     Box(
         modifier = Modifier
@@ -30,34 +42,40 @@ fun LoginScreen(
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier.fillMaxWidth()
         ) {
-            Text(
-                text = "PayrollPro",
-                style = MaterialTheme.typography.headlineMedium,
-                fontWeight = FontWeight.Bold
-            )
-            Spacer(modifier = Modifier.height(4.dp))
-            Text(
-                text = "Payroll Management System",
-                style = MaterialTheme.typography.bodyMedium
+            Image(
+                painter = painterResource(id = R.drawable.payrollpro_logo_full),
+                contentDescription = "PayrollPro",
+                modifier = Modifier
+                    .fillMaxWidth(0.85f)
+                    .padding(bottom = 8.dp)
             )
             Spacer(modifier = Modifier.height(32.dp))
 
             OutlinedTextField(
                 value = username,
                 onValueChange = { username = it },
-                label = { Text("Username") },
+                label = { Text("Username (admin)") },
                 leadingIcon = { Icon(Icons.Default.Person, contentDescription = null) },
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth()
             )
             Spacer(modifier = Modifier.height(12.dp))
+
             OutlinedTextField(
                 value = password,
                 onValueChange = { password = it },
-                label = { Text("Password") },
+                label = { Text("Password (payroll123)") },
                 leadingIcon = { Icon(Icons.Default.Lock, contentDescription = null) },
+                trailingIcon = {
+                    IconButton(onClick = { passwordVisible = !passwordVisible }) {
+                        Icon(
+                            imageVector = if (passwordVisible) Icons.Default.VisibilityOff else Icons.Default.Visibility,
+                            contentDescription = if (passwordVisible) "Hide password" else "Show password"
+                        )
+                    }
+                },
                 singleLine = true,
-                visualTransformation = PasswordVisualTransformation(),
+                visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
                 modifier = Modifier.fillMaxWidth()
             )
 
@@ -69,12 +87,11 @@ fun LoginScreen(
             Spacer(modifier = Modifier.height(24.dp))
             Button(
                 onClick = {
-                    // TODO: replace with a real authentication call once the backend exists
-                    if (username.isNotBlank() && password.isNotBlank()) {
+                    if (username == VALID_USERNAME && password == VALID_PASSWORD) {
                         errorMessage = null
                         onLoginSuccess()
                     } else {
-                        errorMessage = "Please enter both username and password"
+                        errorMessage = "Invalid username or password"
                     }
                 },
                 modifier = Modifier.fillMaxWidth()
