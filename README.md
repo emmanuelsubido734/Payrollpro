@@ -2,7 +2,7 @@
 
 PayrollPro is an Android payroll management system built with Kotlin and Jetpack Compose. It manages employee records and computes payroll (gross pay, tax, deductions, and net pay) against a MySQL database running on XAMPP, using a mixed REST + SOAP backend.
 
-Built as an IT130 Machine Problem.
+Built as an IT140P Machine Problem.
 
 ## Features
 
@@ -142,7 +142,7 @@ Employee deletion is a **soft delete** (an `is_active` flag), so payroll history
 
 ## Login
 
-The login screen checks credentials **on-device only**, against a hardcoded username/password. It is **not** real authentication — it doesn't protect the server or the database, and it exists mainly so the app doesn't drop straight into the dashboard on launch or on a misconfigured URL. Anyone with the APK can read the credential check in source. Do not rely on this for protecting real data.
+The login screen checks credentials **on-device only**, against a hardcoded username/password. It is **not** real authentication — it doesn't protect the server or the database, and it is hardcoded so the app doesn't lock out the user on a misconfigured URL. Anyone with the APK can read the credential check in source. Do not rely on this for protecting real data.
 
 ## Setup
 
